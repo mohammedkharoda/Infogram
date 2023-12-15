@@ -46,7 +46,7 @@ const AuthLayout = () => {
           </section>
           {!imageLoaded ? (
             <div className="mx-auto w-[50%] flex items-center justify-center">
-              {/* // @ts-expect-error because it is not typed */}
+              {/* @ts-expect-error because it is not a expected tag */}
               <l-spiral size="50" speed="0.9" color="orange"></l-spiral>
             </div>
           ) : (
