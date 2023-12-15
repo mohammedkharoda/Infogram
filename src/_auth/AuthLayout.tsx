@@ -1,38 +1,40 @@
 import { useEffect, useState } from 'react'
-import { Outlet, Navigate } from 'react-router-dom'
-
+import { createApi } from 'unsplash-js'
+import { Navigate, Outlet } from 'react-router-dom'
+import 'ldrs/spiral'
 const AuthLayout = () => {
   const [randomImageUrl, setRandomImageUrl] = useState('')
+  const [imageLoaded, setImageLoaded] = useState(false)
   const isAuthenticated = false
+
   useEffect(() => {
-    const fetchRandomImage = async () => {
-      try {
-        const apiKey = import.meta.env.VITE_PEXELS_API_KEY
-        const response = await fetch(
-          `https://api.pexels.com/v1/curated?per_page=1`,
-          {
-            headers: {
-              Authorization: apiKey,
-            },
-          }
-        )
+    const unsplash = createApi({
+      accessKey: import.meta.env.VITE_UNSPLASH_KEY,
+    })
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch random image')
-        }
-
-        const data = await response.json()
-        console.log(data)
-        const imageUrl = data.photos[0]?.src?.original || ''
-
+    unsplash.photos
+      .getRandom({
+        count: 1,
+        collectionIds: ['1198842'],
+      })
+      .then((res) => {
+        setImageLoaded(true)
+        const fetchedImages = res.response || []
+        // @ts-expect-error because it is not typed
+        const imageUrl = fetchedImages[0]?.urls?.full || ''
+        console.log(fetchedImages)
         setRandomImageUrl(imageUrl)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    fetchRandomImage()
+      })
+      .catch((error) => {
+        console.error('Error fetching photos:', error)
+        setImageLoaded(false)
+      })
   }, [])
+
+  const handleImageLoad = () => {
+    setImageLoaded(true)
+  }
+
   return (
     <>
       {isAuthenticated ? (
@@ -42,11 +44,19 @@ const AuthLayout = () => {
           <section className="flex flex-1 justify-center items-center flex-col py-10">
             <Outlet />
           </section>
-          <img
-            src={randomImageUrl}
-            alt="logo"
-            className="hidden xl:block h-full w-1/2 object-cover bg-no-repeat"
-          />
+          {!imageLoaded ? (
+            <div className="mx-auto w-[50%] flex items-center justify-center">
+              {/* // @ts-expect-error because it is not typed */}
+              <l-spiral size="50" speed="0.9" color="orange"></l-spiral>
+            </div>
+          ) : (
+            <img
+              src={randomImageUrl}
+              alt="logo"
+              className="hidden xl:block h-full w-1/2 object-cover bg-no-repeat"
+              onLoad={handleImageLoad}
+            />
+          )}
         </>
       )}
     </>
