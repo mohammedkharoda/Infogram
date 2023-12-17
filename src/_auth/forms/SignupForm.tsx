@@ -16,10 +16,11 @@ import { z } from 'zod'
 import 'ldrs/infinity'
 import { Link } from 'react-router-dom'
 import { createUserAccount } from '@/lib/appwrite/api'
+import { useToast } from '@/components/ui/use-toast'
 
 const SignupForm = () => {
   const isLoading = false
-  // 1. Define your form.
+  const { toast } = useToast()
   const form = useForm<z.infer<typeof SignUpValidation>>({
     resolver: zodResolver(SignUpValidation),
     defaultValues: {
@@ -30,10 +31,15 @@ const SignupForm = () => {
     },
   })
 
-  // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof SignUpValidation>) {
     const newUser = await createUserAccount(values)
-    console.log(newUser, '==> user')
+
+    if (!newUser) {
+      return toast({
+        title: "Something went wrong no user found!",
+      })
+    }
+
   }
 
   return (
