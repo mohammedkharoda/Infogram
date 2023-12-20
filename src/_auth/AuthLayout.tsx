@@ -15,7 +15,6 @@ const AuthLayout = () => {
     unsplash.photos
       .getRandom({
         count: 1,
-        collectionIds: ['1198842'],
       })
       .then((res) => {
         setImageLoaded(true)

@@ -1,6 +1,4 @@
 import { Button } from '@/components/ui/button'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 import {
   Form,
   FormControl,
@@ -11,16 +9,25 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { SignUpValidation } from '@/lib/validation'
-import { z } from 'zod'
-import 'ldrs/infinity'
-import { Link } from 'react-router-dom'
-import { createUserAccount } from '@/lib/appwrite/api'
 import { useToast } from '@/components/ui/use-toast'
+import { createUserAccount } from '@/lib/appwrite/api'
+import {
+  useCreateUserAccountMutation,
+  useSignInAccountMutation,
+} from '@/lib/react-query/queriesAndMutation'
+import { SignUpValidation } from '@/lib/validation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import 'ldrs/infinity'
+import { useForm } from 'react-hook-form'
+import { Link } from 'react-router-dom'
+import { z } from 'zod'
 
 const SignupForm = () => {
-  const isLoading = false
   const { toast } = useToast()
+  const { mutateAsync: creatUserAccount, isPending } =
+    useCreateUserAccountMutation()
+  const { mutateAsync: singInAccount, isPending } = useSignInAccountMutation()
+
   const form = useForm<z.infer<typeof SignUpValidation>>({
     resolver: zodResolver(SignUpValidation),
     defaultValues: {
@@ -36,10 +43,20 @@ const SignupForm = () => {
 
     if (!newUser) {
       return toast({
-        title: "Something went wrong no user found!",
+        title: 'Something went wrong no user found!',
       })
     }
 
+    const session = await singInAccount({
+      email: values.email,
+      password: values.password,
+    })
+
+    if (!session) {
+      return toast({
+        title: 'Something went wrong no session found!',
+      })
+    }
   }
 
   return (
@@ -122,7 +139,7 @@ const SignupForm = () => {
             <Button type="submit" className="shad-button_primary">
               {isLoading ? (
                 <div className="flex-center gap-2">
-                  {/* @ts-expect-error because it an import lib*/}
+                  {/* @ts-expect-error because it on import lib*/}
                   <l-infinity
                     size="35"
                     stroke="2"
