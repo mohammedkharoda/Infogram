@@ -1,6 +1,6 @@
 import { INewUser } from "@/types";
 import { account, appwriteConfig, avatars, database } from './config'
-import { ID } from 'appwrite'
+import { ID, Query } from 'appwrite'
 
 export async function createUserAccount(user: INewUser) {
   try {
@@ -10,30 +10,33 @@ export async function createUserAccount(user: INewUser) {
       user.password,
       user.name
     )
-    if (!newAccount) throw Error('Account creation failed')
+
+    if (!newAccount) throw Error
 
     const avatarUrl = avatars.getInitials(user.name)
 
-    // creating new users
-    const newUser = saveUserToDB({
+    const newUser = await saveUserToDB({
       accountId: newAccount.$id,
-      email: newAccount.email,
       name: newAccount.name,
-      imageUrl: avatarUrl,
+      email: newAccount.email,
       username: user.username,
+      imageUrl: avatarUrl,
     })
+
     return newUser
   } catch (error) {
     console.log(error)
+    return error
   }
 }
 
+// ============================== SAVE USER TO DB
 export async function saveUserToDB(user: {
   accountId: string
   email: string
   name: string
   imageUrl: URL
-  username: string
+  username?: string
 }) {
   try {
     const newUser = await database.createDocument(
@@ -49,12 +52,46 @@ export async function saveUserToDB(user: {
   }
 }
 
-export async function signInAccount(user: { email: string, password: string }) {
+// ============================== SIGN IN
+export async function signInAccount(user: { email: string; password: string }) {
   try {
     const session = await account.createEmailSession(user.email, user.password)
+
     return session
+  } catch (error) {
+    console.log(error)
   }
-  catch (e) {
-    console.log(e)
+}
+
+// ============================== GET ACCOUNT
+export async function getAccount() {
+  try {
+    const currentAccount = await account.get()
+
+    return currentAccount
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// ============================== GET USER
+export async function getCurrentUser() {
+  try {
+    const currentAccount = await getAccount()
+
+    if (!currentAccount) throw Error
+
+    const currentUser = await database.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      [Query.equal('accountId', currentAccount.$id)]
+    )
+
+    if (!currentUser) throw Error
+
+    return currentUser.documents[0]
+  } catch (error) {
+    console.log(error)
+    return null
   }
 }
