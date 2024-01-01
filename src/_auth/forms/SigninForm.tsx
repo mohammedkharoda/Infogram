@@ -25,10 +25,8 @@ const SigninForm = () => {
     },
   });
 
-  // Queries
   const { mutateAsync: signInAccount } = useSignInAccountMutation();
 
-  // Handler
   const handleSignup = async (user: z.infer<typeof SignInValidation>) => {
     try {
       const session = await signInAccount({
