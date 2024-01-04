@@ -95,3 +95,14 @@ export async function getCurrentUser() {
     return null
   }
 }
+
+// ========================== SignOut User
+export async function signOutAccount() {
+  try {
+    const session = await account.deleteSession('current')
+    return session
+  }
+  catch (e) {
+    console.log(e)
+  }
+} 
