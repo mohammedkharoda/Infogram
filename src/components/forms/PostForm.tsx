@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -14,29 +13,45 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "../ui/textarea"
 import FileUploader from "../shared/FileUploader"
-const formSchema = z.object({
-    username: z.string().min(2, {
-        message: "Username must be at least 2 characters.",
-    }),
-})
+import { postValidation } from "@/lib/validation"
+import { Models } from "appwrite"
+import { useUserContext } from "@/context/AuthContext"
+import { toast } from "../ui/use-toast"
+import { useNavigate } from "react-router-dom"
+import { useCreatePost } from "@/lib/react-query/queriesAndMutation"
+
+interface PostFromProp {
+    post?: Models.Document
+}
 
 
-
-
-const PostForm = ({ post }) => {
+const PostForm = ({ post }: PostFromProp) => {
+    const { mutateAsync: createPost, isPending: isLoadingCreate } = useCreatePost();
+    const { user } = useUserContext()
+    const navigate = useNavigate()
     // 1. Define your form.
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<z.infer<typeof postValidation>>({
+        resolver: zodResolver(postValidation),
         defaultValues: {
-            username: "",
+            caption: post ? post?.caption : "",
+            file: [],
+            location: post ? post?.location : "",
+            tags: post ? post.tags.join(",") : ''
         },
     })
 
     // 2. Define a submit handler.
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
-        console.log(values)
+    async function onSubmit(values: z.infer<typeof postValidation>) {
+        const newPost = await createPost({
+            ...values,
+            userId: user.id
+        })
+        if (!newPost) {
+            toast({
+                title: "please try again!"
+            })
+        }
+        navigate('/')
     }
     return (
         <Form {...form}>
@@ -88,7 +103,7 @@ const PostForm = ({ post }) => {
                         <FormItem>
                             <FormLabel className="shad-form_label">Add Tags</FormLabel>
                             <FormControl>
-                                <Input type="text" className="shad-input custom-scrollbar" placeholder="Smile" />
+                                <Input type="text" className="shad-input custom-scrollbar" placeholder="Smile" {...field} />
                             </FormControl>
                             <FormMessage className="shad-form_message" />
                         </FormItem>

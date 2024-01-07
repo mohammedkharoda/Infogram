@@ -9,6 +9,7 @@ const BottomBar = () => {
                 const isActive = pathname === link.route
                 return (
                     <Link to={link.route}
+                        key={link.imgURL}
                         className={`${isActive && 'bg-primary-500 rounded-[10px] flex-center flex-col gap-1 p-2 transition'}`}
                     >
                         <img src={link.imgURL} alt={link.label} className={`${isActive && 'invert-white'}`} width={16} height={16} />
