@@ -2,7 +2,6 @@ import Loader from '@/components/shared/Loader';
 import PostCard from '@/components/shared/PostCard';
 import { useGetRecentposts } from '@/lib/react-query/queriesAndMutation';
 import { Models } from 'appwrite';
-import React from 'react'
 
 const Home = () => {
   const post = null;
