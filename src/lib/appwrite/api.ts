@@ -192,7 +192,6 @@ export async function deleteFile(fileId: string) {
   }
 }
 
-
 export async function getRecentPosts() {
   const posts = await database.listDocuments(
     appwriteConfig.databaseId,
@@ -201,4 +200,58 @@ export async function getRecentPosts() {
   )
   if (!posts) throw new Error()
   return posts
+}
+
+// =============================== LIKED POSTS
+export async function likePost(postId: string, likesArray: string[]) {
+  try {
+    const updatePost = await database.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.postsCollectionId,
+      postId,
+      {
+        likes: likesArray,
+      }
+    )
+    if (!updatePost) {
+      throw Error
+    }
+    return updatePost
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+// ============================== SAVED POSTS
+export async function savePost(postId: string, userId: string) {
+  try {
+    const updatePost = await database.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.savesCollectionId,
+      ID.unique(),
+      {
+        user: userId,
+        post: postId,
+      }
+    )
+    if (!updatePost) throw new Error()
+    return updatePost
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+// ============================== DELETE POSTS
+export async function deletePost(saveRecordId: string) {
+  try {
+    const statusCode = await database.deleteDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.savesCollectionId,
+      saveRecordId
+    )
+    if (!statusCode) throw new Error()
+    return { status: 'ok' }
+  } catch (e) {
+    console.log(e)
+  }
 }
