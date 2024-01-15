@@ -1,4 +1,4 @@
-import { INewPost, INewUser, IUpdatePost } from '@/types'
+import { IInfinitePosts, INewPost, INewUser, IUpdatePost } from '@/types'
 import { account, appwriteConfig, avatars, database, storage } from './config'
 import { ID, Query } from 'appwrite'
 
@@ -363,6 +363,82 @@ export async function getUserPosts(userId?: string) {
     if (!post) throw Error
 
     return post
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// ============================= GET INFINITE POSTS
+
+export const getInfinitePosts = async ({ pageParam }: IInfinitePosts) => {
+  const queries: any[] = [Query.orderDesc('$updatedAt'), Query.limit(10)]
+
+  if (pageParam) {
+    queries.push(Query.cursorAfter(pageParam.toString()))
+  }
+
+  try {
+    const posts = await database.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.postsCollectionId,
+      queries
+    )
+
+    if (!posts) throw Error
+
+    return posts
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const searchPosts = async (searchTerm: string) => {
+  try {
+    const posts = await database.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.postsCollectionId,
+      [Query.search('caption', searchTerm)]
+    )
+
+    if (!posts) throw Error
+
+    return posts
+  } catch (error) {
+    console.log(error)
+  }
+}
+export async function getUsers(limit?: number) {
+  const queries: any[] = [Query.orderDesc('$createdAt')]
+
+  if (limit) {
+    queries.push(Query.limit(limit))
+  }
+
+  try {
+    const users = await database.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      queries
+    )
+
+    if (!users) throw Error
+
+    return users
+  } catch (error) {
+    console.log(error)
+  }
+}
+export const getSavedPosts = async (userId: string) => {
+  try {
+    const saves = await database.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.savesCollectionId,
+      [Query.equal('user', userId)]
+    )
+
+    if (!saves) throw Error
+
+    return saves
   } catch (error) {
     console.log(error)
   }

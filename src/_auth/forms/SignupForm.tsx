@@ -1,86 +1,100 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
-import * as z from "zod";
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { Link, useNavigate } from 'react-router-dom'
+import * as z from 'zod'
 
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { useUserContext } from "@/context/AuthContext";
-import { useCreateUserAccountMutation, useSignInAccountMutation } from "@/lib/react-query/queriesAndMutation";
-import { SignUpValidation } from "@/lib/validation";
+import { Button } from '@/components/ui/button'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { useToast } from '@/components/ui/use-toast'
+import { useUserContext } from '@/context/AuthContext'
+import {
+  useCreateUserAccountMutation,
+  useSignInAccountMutation,
+} from '@/lib/react-query/queriesAndMutation'
+import { SignUpValidation } from '@/lib/validation'
 import 'ldrs/infinity'
 
 const SignupForm = () => {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
+  const { toast } = useToast()
+  const navigate = useNavigate()
+  const { checkAuthUser, isLoading: isUserLoading } = useUserContext()
 
   const form = useForm<z.infer<typeof SignUpValidation>>({
     resolver: zodResolver(SignUpValidation),
     defaultValues: {
-      name: "",
-      username: "",
-      email: "",
-      password: "",
+      name: '',
+      username: '',
+      email: '',
+      password: '',
     },
-  });
+  })
 
   // Queries
-  const { mutateAsync: createUserAccount, isPending: isCreatingAccount } = useCreateUserAccountMutation();
-  const { mutateAsync: signInAccount, isPending: isSigningInUser } = useSignInAccountMutation();
+  const { mutateAsync: createUserAccount, isPending: isCreatingAccount } =
+    useCreateUserAccountMutation()
+  const { mutateAsync: signInAccount, isPending: isSigningInUser } =
+    useSignInAccountMutation()
 
   // Handler
   const handleSignup = async (user: z.infer<typeof SignUpValidation>) => {
     try {
-      const newUser = await createUserAccount(user);
+      const newUser = await createUserAccount(user)
 
       if (!newUser) {
-        toast({ title: "Sign up failed. Please try again.", });
-        return;
+        toast({ title: 'Sign up failed. Please try again.' })
+        return
       }
 
       const session = await signInAccount({
         email: user.email,
         password: user.password,
-      });
+      })
 
       if (!session) {
-        toast({ title: "Something went wrong. Please login your new account", });
-        navigate("/sign-in");
-        return;
+        toast({ title: 'Something went wrong. Please login your new account' })
+        navigate('/sign-in')
+        return
       }
 
-      const isLoggedIn = await checkAuthUser();
+      const isLoggedIn = await checkAuthUser()
 
       if (isLoggedIn) {
-        form.reset();
+        form.reset()
 
-        navigate("/");
+        navigate('/')
       } else {
-        toast({ title: "Login failed. Please try again.", });
+        toast({ title: 'Login failed. Please try again.' })
 
-        return;
+        return
       }
     } catch (error) {
-      console.log({ error });
+      console.log({ error })
     }
-  };
+  }
 
   return (
     <Form {...form}>
       <div className="sm:w-420 flex-center flex-col">
-        <h2 className="h3-bold md:h2-bold pt-5 sm:pt-12">
-          Create a new account
-        </h2>
+        <div className="w-1/2">
+          <img src="/assets/images/logo.svg" alt="logo" className="w-full" />
+        </div>
+        <h2 className="h3-bold md:h2-bold pt-3">Create a new account</h2>
         <p className="text-light-3 small-medium md:base-regular mt-2">
           To use snapgram, Please enter your details
         </p>
 
         <form
           onSubmit={form.handleSubmit(handleSignup)}
-          className="flex flex-col gap-5 w-full mt-4">
+          className="flex flex-col gap-5 w-full mt-4"
+        >
           <FormField
             control={form.control}
             name="name"
@@ -141,17 +155,17 @@ const SignupForm = () => {
             {isCreatingAccount || isSigningInUser || isUserLoading ? (
               <div className="flex-center gap-2">
                 {/* @ts-expect-error because it is not a JSX */}
-                  <l-infinity
-                    size="35"
-                    stroke="2"
-                    stroke-length="0.15"
-                    bg-opacity="0.1"
-                    speed="1.3"
-                    color="#f4d58d"
-                  />
+                <l-infinity
+                  size="35"
+                  stroke="2"
+                  stroke-length="0.15"
+                  bg-opacity="0.1"
+                  speed="1.3"
+                  color="#f4d58d"
+                />
               </div>
             ) : (
-              "Sign Up"
+              'Sign Up'
             )}
           </Button>
 
@@ -159,14 +173,15 @@ const SignupForm = () => {
             Already have an account?
             <Link
               to="/sign-in"
-              className="text-primary-500 text-small-semibold ml-1">
+              className="text-primary-500 text-small-semibold ml-1"
+            >
               Log in
             </Link>
           </p>
         </form>
       </div>
     </Form>
-  );
-};
+  )
+}
 
-export default SignupForm;
+export default SignupForm

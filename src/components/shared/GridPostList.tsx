@@ -16,14 +16,13 @@ const GridPostList = ({
   showStats = true,
 }: GridPostListProps) => {
   const { user } = useUserContext()
-
   return (
     <ul className="grid-container">
-      {posts.map((post) => (
-        <li key={post.$id} className="relative min-w-80 h-80">
-          <Link to={`/posts/${post.$id}`} className="grid-post_link">
+      {posts?.map((post) => (
+        <li key={post?.$id} className="relative min-w-80 h-80">
+          <Link to={`/posts/${post?.$id}`} className="grid-post_link">
             <img
-              src={post.imageUrl}
+              src={post?.imageUrl}
               alt="post"
               className="h-full w-full object-cover"
             />
@@ -40,10 +39,10 @@ const GridPostList = ({
                   alt="creator"
                   className="w-8 h-8 rounded-full"
                 />
-                <p className="line-clamp-1">{post.creator.name}</p>
+                <p className="line-clamp-1">{post?.creator?.name}</p>
               </div>
             )}
-            {showStats && <PostStats post={post} userId={user.id} />}
+            {showStats && <PostStats post={post} userId={user?.id} />}
           </div>
         </li>
       ))}
